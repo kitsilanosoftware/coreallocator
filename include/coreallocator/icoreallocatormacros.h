@@ -156,6 +156,20 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /// @param _allocator   _allocator must implement the EA::Allocator::ICoreAllocator interface
 /// @param _objtype     Type of object to allocate
+/// @param _count       number of objects to allocate
+/// @param _allocname   string to give allocation name
+/// @param _flags       allocation flags, see EA::Allocator::ICoreAllocator for a description.
+/// @return             Allocated and constructed objects
+///
+/// Example usage: //Allocates an array of 42 widgets, then destroys it
+///    Widget* widgetArray = CORE_NEW_ARRAY(allocator, Widget, 42, "42 Widgets", EA::Allocator::MEM_TEMP);
+///    CORE_DELETE_ARRAY(allocator,widgetArray);
+
+#define CORE_NEW_ARRAY_UNINITIALIZED(_allocator, _objtype, _count, _allocname, _flags)   \
+    EA::Allocator::detail::CreateArrayUninitialized<_objtype>((_allocator), (_count), CORE_ALLOCATOR_DEBUGPARAMS((_allocname)), (_flags))
+
+/// @param _allocator   _allocator must implement the EA::Allocator::ICoreAllocator interface
+/// @param _objtype     Type of object to allocate
 /// @param _count       number of objects to allocate.
 /// @param _allocname   string to give allocation name
 /// @param _flags       allocation flags, see EA::Allocator::ICoreAllocator for a description.
@@ -164,6 +178,12 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define CORE_NEW_ARRAY_ALIGN(_allocator, _objtype, _count, _allocname, _flags, _align) \
     EA::Allocator::detail::CreateArray<_objtype>((_allocator), (_count), CORE_ALLOCATOR_DEBUGPARAMS((_allocname)), (_flags), (_align))
+
+/// @param _allocator   _allocator must implement the EA::Allocator::ICoreAllocator interface
+/// @param _ptr         pointer to the array previously allocated with CORE_NEW_ARRAY or CORE_NEW_ARRAY_ALIGN
+
+#define CORE_NEW_ARRAY_ALIGN_UNINITIALIZED(_allocator, _objtype, _count, _allocname, _flags, _align) \
+    EA::Allocator::detail::CreateArrayUninitialized<_objtype>((_allocator), (_count), CORE_ALLOCATOR_DEBUGPARAMS((_allocname)), (_flags), (_align))
 
 /// @param _allocator   _allocator must implement the EA::Allocator::ICoreAllocator interface
 /// @param _ptr         pointer to the array previously allocated with CORE_NEW_ARRAY or CORE_NEW_ARRAY_ALIGN

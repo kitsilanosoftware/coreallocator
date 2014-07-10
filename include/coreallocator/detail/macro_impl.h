@@ -37,8 +37,10 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /// @brief This header file defines helper methods and functions needed by icoreallocatormacros
 
 #include <EABase/eabase.h>
+EA_DISABLE_VC_WARNING(4836 4574)
 #include <stddef.h>     // size_t definition
 #include <new>          // for placement new and array placement new
+EA_RESTORE_VC_WARNING()
 
 namespace EA
 {
@@ -121,6 +123,56 @@ namespace EA
 
             /// @remarks
             /// Creates an array of objects of type T.
+            /// Use CORE_NEW_ARRAY_UNINITIALIZED instead of calling this directly.
+
+            template <typename T>
+            inline T* CreateArrayUninitialized(Allocator::ICoreAllocator* allocator, size_t count, const char* name, unsigned int flags)
+            {
+                // To do: Use type traits to detect that T is a built-in type and not generate a size_t prefix if so.
+
+                // Make the allocation with kOffset in front to allow us to store count
+                size_t* p = (size_t*)allocator->Alloc(kOffset + (sizeof(T) * count), name, flags);
+
+                // put the size_t count in front of the array allocation.
+                *p = count;
+
+                //use placement new to construct each object
+                T* first = reinterpret_cast<T*>((uintptr_t)p+kOffset);
+                T* end = first+count;
+                for (T* cur = first; cur < end; cur++)
+                {
+                    new(cur)T;
+                }
+                return first;
+            }
+
+            /// @remarks
+            /// Creates an array of objects of type T.
+            /// Use CORE_NEW_ARRAY_UNINITIALIZED instead of calling this directly.
+
+            template <typename T>
+            inline T* CreateArrayUninitialized(Allocator::ICoreAllocator* allocator, size_t count, const ICoreAllocator::DebugParams debugParams, unsigned int flags)
+            {
+                // To do: Use type traits to detect that T is a built-in type and not generate a size_t prefix if so.
+
+                // Make the allocation with kOffset in front to allow us to store count
+                size_t* p = (size_t*)allocator->AllocDebug(kOffset + (sizeof(T) * count), debugParams, flags);
+
+                // put the size_t count in front of the array allocation.
+                *p = count;
+
+                //use placement new to construct each object
+                T* first = reinterpret_cast<T*>((uintptr_t)p+kOffset);
+                T* end = first+count;
+                for (T* cur = first; cur < end; cur++)
+                {
+                    new(cur)T;
+                }
+                return first;
+            }
+
+            /// @remarks
+            /// Creates an array of objects of type T.
             /// Use CORE_NEW_ARRAY_ALIGN instead of calling this directly
 
             template <typename T>
@@ -165,6 +217,56 @@ namespace EA
                 for (T* cur = first; cur < end; cur++)
                 {
                     new(cur)T();
+                }
+                return first;
+            }
+
+            /// @remarks
+            /// Creates an array of objects of type T.
+            /// Use CORE_NEW_ARRAY_ALIGN_UNINITIALIZED instead of calling this directly
+
+            template <typename T>
+            inline T* CreateArrayUninitialized(Allocator::ICoreAllocator* allocator, size_t count, const char* name, unsigned int flags, unsigned int align)
+            {
+                // To do: Use type traits to detect that T is a built-in type and not generate a size_t prefix if so.
+
+                // Make the allocation with kOffset in front to allow us to store count
+                size_t* p = (size_t*)allocator->Alloc(kOffset + (sizeof(T) * count), name, flags, align, kOffset);
+
+                // put the size_t count in front of the array allocation.
+                *p = count;
+
+                //use placement new to construct each object
+                T* first = reinterpret_cast<T*>((uintptr_t)p+kOffset);
+                T* end = first+count;
+                for (T* cur = first; cur < end; cur++)
+                {
+                    new(cur)T;
+                }
+                return first;
+            }
+
+            /// @remarks
+            /// Creates an array of objects of type T.
+            /// Use CORE_NEW_ARRAY_ALIGN_UNINITIALIZED instead of calling this directly
+
+            template <typename T>
+            inline T* CreateArrayUninitialized(Allocator::ICoreAllocator* allocator, size_t count, const ICoreAllocator::DebugParams debugParams, unsigned int flags, unsigned int align)
+            {
+                // To do: Use type traits to detect that T is a built-in type and not generate a size_t prefix if so.
+
+                // Make the allocation with kOffset in front to allow us to store count
+                size_t* p = (size_t*)allocator->AllocDebug(kOffset + (sizeof(T) * count), debugParams, flags, align, kOffset);
+
+                // put the size_t count in front of the array allocation.
+                *p = count;
+
+                //use placement new to construct each object
+                T* first = reinterpret_cast<T*>((uintptr_t)p+kOffset);
+                T* end = first+count;
+                for (T* cur = first; cur < end; cur++)
+                {
+                    new(cur)T;
                 }
                 return first;
             }
